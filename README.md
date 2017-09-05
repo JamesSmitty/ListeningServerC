@@ -1,2 +1,4 @@
 # ListeningServerC
-A socket based listening server in C++ for linux computers
+A file server in C++ utilizing sockets for linux computers.
+
+The client must send a request in the form `GET <FILEPATH ON SERVER>`
