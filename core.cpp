@@ -37,22 +37,23 @@ int sendHelper(int sockfd, const char *msg) //streamlines the sending
     }
     else
     {
-        printf("%d bytes of %d total were sent through socketfd # %d", stat, strlen(msg), sockfd);
+        printf("%d bytes of %lu total were sent through socketfd #%d\n", stat, strlen(msg), sockfd);
     }
     return stat;
 }
 
-const char * recvGet(int sockfd, int buffersize)
+const char *recvGet(int sockfd, int buffersize)
 { //receive the command and return the file contents requested
     char recvBuffer[buffersize];
     int stat = recv(sockfd, recvBuffer, buffersize, 0);
+    printf("Client: %s\n", recvBuffer);
     if (stat == -1)
     {
         perror("recv");
     }
     else
     {
-        printf("%d bytes were received through # %d", stat, sockfd);
+        printf("%d bytes were received through #%d\n", stat, sockfd);
         std::string str(recvBuffer);
         std::ifstream t(str.substr(4).c_str()); //slice off the 'GET ' from filepath
         std::stringstream buffer;
@@ -133,9 +134,8 @@ int getaddrinfo(const char *node,     // e.g. "www.example.com" or IP
 
     socklen_t lenSockAddr = sizeof(struct sockaddr);
     struct sockaddr_in foo;
-    getsockname(listenSocketfd, (struct sockaddr *) &foo, &lenSockAddr);
+    getsockname(listenSocketfd, (struct sockaddr *)&foo, &lenSockAddr);
     fprintf(stderr, "Server is listening on %s:%d\n", inet_ntoa(foo.sin_addr), ntohs(foo.sin_port));
-
 
     //int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 
@@ -144,12 +144,12 @@ int getaddrinfo(const char *node,     // e.g. "www.example.com" or IP
     socklen_t client_addr_size;          //size of the peer
     int new_fd;                          //new connection put on new_fd
     char s[INET6_ADDRSTRLEN];            // string that is the length of an ipv6 address
-
+    client_addr_size = sizeof(client_addr);
+    
     while (true) //infinite serving loop
     {
-        client_addr_size = sizeof(client_addr);
         new_fd = accept(listenSocketfd, (struct sockaddr *)&client_addr, &client_addr_size); //accept new connection and save the socket fd for this connection
-        if (new_fd == -1)                                                             //check for error
+        if (new_fd == -1) //check for error
         {
             perror("accept");
             continue;
@@ -165,7 +165,7 @@ int getaddrinfo(const char *node,     // e.g. "www.example.com" or IP
         const char *fileContents = recvGet(new_fd, RECVBUFFER); //receive information from client, get the file contents, and save them
 
         sendHelper(new_fd, fileContents); //send file contents to client
-
+        printf("Connection closed\n");
         close(new_fd); //close the socket and move to next client
     }
     return 0;
